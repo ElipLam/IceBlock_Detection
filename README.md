@@ -1,7 +1,9 @@
 # Ice Block Detection
-Counter Ice Block in A Factory
-Thanks mikel-brostrom
-This project base on Yolov5_DeepSort_Pytorch
+Counter Ice Block in A Factory.
+
+Thanks mikel-brostrom.
+
+This project base on Yolov5_DeepSort_Pytorch.
 
 # Yolov5 + Deep Sort with PyTorch
 
@@ -37,7 +39,7 @@ All dependencies are included in the associated docker images. Docker requiremen
 
 1. Clone the repository recursively:
 
-`git clone --recurse-submodules https://github.com/mikel-brostrom/Yolov5_DeepSort_Pytorch.git`
+`git clone --recurse-submodules https://github.com/ElipLam/IceBlock_Detection.git`
 
 If you already cloned and forgot to use `--recurse-submodules` you can run `git submodule update --init`
 
