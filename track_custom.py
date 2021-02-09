@@ -109,7 +109,7 @@ def draw_boxes(img, bbox, identities=None, offset=(0, 0),):
         memory[id].append(centerPoint)
         previous_centerpoint = memory[id][0]
         cv2.line(img, previous_centerpoint, centerPoint, color, 4)
-        
+
         if intersect(centerPoint, previous_centerpoint, line[0], line[1]) and id not in already_counted:
             total_counter += 1
             # draw red line
@@ -265,7 +265,7 @@ def detect(opt, save_img=False):
             cv2.putText(im0, "down: " + str(down_count), (30, 60+int(2*font_size[0][1]+2*font_size[1])),
                         cv2.FONT_HERSHEY_DUPLEX, 1.2, color_result, 2)
             # Print time (inference + NMS)
-            print('%sDone. (%.3fs)' % (s, t2 - t1))
+            print('%sDone. (%.3fs) - %.2f fps' % (s, t2 - t1,1/(t2 - t1)))
 
             # Stream results
             if view_img:
