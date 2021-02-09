@@ -2,7 +2,7 @@ import sys
 sys.path.insert(0, './yolov5')
 
 from yolov5.utils.datasets import LoadImages, LoadStreams
-from yolov5.utils.general import check_img_size, non_max_suppression, scale_coords
+from yolov5.utils.general import check_img_size, non_max_suppression, scale_coords, increment_path
 from yolov5.utils.torch_utils import select_device, time_synchronized
 from deep_sort_pytorch.utils.parser import get_config
 from deep_sort_pytorch.deep_sort import DeepSort
@@ -129,7 +129,7 @@ def detect(opt, save_img=False):
         opt.output, opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size
     webcam = source == '0' or source.startswith(
         'rtsp') or source.startswith('http') or source.endswith('.txt')
-    # global line
+    
     # initialize deepsort
     cfg = get_config()
     cfg.merge_from_file(opt.config_deepsort)
@@ -141,9 +141,11 @@ def detect(opt, save_img=False):
 
     # Initialize
     device = select_device(opt.device)
-    if os.path.exists(out):
-        shutil.rmtree(out)  # delete output folder
-    os.makedirs(out)  # make new output folder
+    out = Path(increment_path(Path(opt.output), exist_ok=opt.exist_ok))  # increment run
+    (out / 'labels' if save_txt else out).mkdir(parents=True, exist_ok=True)  # make dir
+    # if os.path.exists(out):
+    #     shutil.rmtree(out)  # delete output folder
+    # os.makedirs(out)  # make new output folder
     half = device.type != 'cpu'  # half precision only supported on CUDA
 
     # Load model
@@ -310,6 +312,8 @@ if __name__ == '__main__':
                         default='inference/images', help='source')
     parser.add_argument('--output', type=str, default='inference/output',
                         help='output folder')  # output folder
+    parser.add_argument('--exist-ok', action='store_true',
+                        help='existing inference/output ok, do not increment')
     parser.add_argument('--img-size', type=int, default=640,
                         help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float,
