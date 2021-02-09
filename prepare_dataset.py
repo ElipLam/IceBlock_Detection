@@ -2,24 +2,36 @@
 import os
 
 parent_directory = '../yolov5_dataset'
-directory = 'iceblock'
+iceblocks_directory = 'iceblocks'
+images_directory = 'images'
+videos_directory = 'videos'
 subfolder1 = 'images'
 subfolder2 = 'videos'
+
 if  os.path.exists(parent_directory) == False:
   os.mkdir(parent_directory)
-  print(" Created '% s' directory" % parent_directory)
+  print("Created '%s' directory" % parent_directory)
 
-#create directory
-path = os.path.join(parent_directory,directory)
+#create images directory
+path = os.path.join(parent_directory,images_directory)
 if os.path.exists(path)==False:
   os.mkdir(path)
-  print(" Created '%s' folder" % directory) 
+  print("Created '%s' directory" % images_directory) 
 
-#create sub folder  
+#create videos directory
+path = os.path.join(parent_directory,videos_directory)
+if os.path.exists(path)==False:
+  os.mkdir(path)
+  print("Created '%s' directory" % videos_directory)   
+
+#create ice blocks directory
+path = os.path.join(parent_directory,iceblocks_directory)
+if os.path.exists(path)==False:
+  os.mkdir(path)
+  print("Created '%s' directory" % iceblocks_directory) 
+#create iceblocks subfolder 
 if os.path.exists(path+'/'+subfolder1) ==False:
   os.mkdir(path+'/'+subfolder1) 
-  print(" Created '%s' subfolder  %s in" %(subfolder1, path))
 if os.path.exists(path+'/'+subfolder2) ==False:
   os.mkdir(path+'/'+subfolder2) 
-  print(" Created '%s' subfolder in %s" %(subfolder2, path))
-print("Finish creating the directory")
+print("Created directory")
