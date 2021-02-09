@@ -25,24 +25,36 @@ down_count = 0
 already_counted = deque(maxlen=70)  # temporary memory for storing counted IDs
 intersect_info = []  # initialise intersection list
 memory = {}
+#define color
+color_linetracking = [0, 255, 255]
+color_result = [0, 165, 255]
+color_fps = [0, 255, 255]
 
 # Return true if line segments AB and CD intersect
-def intersect(A,B,C,D):
-	return ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)
 
-def ccw(A,B,C):
+def intersect(A, B, C, D):
+	return ccw(A, C, D) != ccw(B, C, D) and ccw(A, B, C) != ccw(A, B, D)
+
+def ccw(A, B, C):
 	return (C[1]-A[1]) * (B[0]-A[0]) > (B[1]-A[1]) * (C[0]-A[0])
 
 # @staticmethod
+
+
 def vector_angle(midpoint, previous_midpoint):
     x = midpoint[0] - previous_midpoint[0]
     y = midpoint[1] - previous_midpoint[1]
     return math.degrees(math.atan2(y, x))
+
+
 def setline(x1y1, x2y2):
-    line[0]= x1y1
-    line[1]= x2y2
-    return line    
+    line[0] = x1y1
+    line[1] = x2y2
+    return line
+
+
 palette = (2 ** 11 - 1, 2 ** 15 - 1, 2 ** 20 - 1)
+
 
 def bbox_rel(*xyxy):
     """" Calculates the relative bounding box from absolute pixel values. """
@@ -86,26 +98,29 @@ def draw_boxes(img, bbox, identities=None, offset=(0, 0),):
             img, (x1, y1), (x1 + t_size[0] + 3, y1 + t_size[1] + 4), color, -1)
         cv2.putText(img, label, (x1, y1 +
                                  t_size[1] + 4), cv2.FONT_HERSHEY_PLAIN, 2, [255, 255, 255], 2)
+        #counter 
         centerX = (x1+x2)/2
         centerY = (y1+y2)/2
-        centerPoint = (int(centerX),int(centerY))
+        centerPoint = (int(centerX), int(centerY))
+        cv2.circle(img, centerPoint, 4, color, -1)
+
         if id not in memory:
-            memory[id]=deque(maxlen=2)
+            memory[id] = deque(maxlen=2)
         memory[id].append(centerPoint)
-        previous_centerpoint = memory[id][0]    
-        cv2.circle(img, centerPoint,4,color,-1)
-        cv2.line(img,previous_centerpoint,centerPoint,color,4)
-        if intersect(centerPoint,previous_centerpoint,line[0],line[1]) and id not in already_counted:
+        previous_centerpoint = memory[id][0]
+        cv2.line(img, previous_centerpoint, centerPoint, color, 4)
+        
+        if intersect(centerPoint, previous_centerpoint, line[0], line[1]) and id not in already_counted:
             total_counter += 1
             # draw red line
             cv2.line(img, line[0], line[1], (0, 0, 255), 3)
-            already_counted.append(id) # Set already counted for ID to true.
-            angle = vector_angle(centerPoint,previous_centerpoint)
-            if angle >0:
-                down_count +=1
-            if angle <0:
-                up_count +=1
-        
+            already_counted.append(id)  # Set already counted for ID to true.
+            angle = vector_angle(centerPoint, previous_centerpoint)
+            if angle > 0:
+                down_count += 1
+            if angle < 0:
+                up_count += 1
+
     return img
 
 
@@ -137,7 +152,6 @@ def detect(opt, save_img=False):
     model.to(device).eval()
     if half:
         model.half()  # to FP16
-    
 
     # Set Dataloader
     vid_path, vid_writer = None, None
@@ -159,7 +173,7 @@ def detect(opt, save_img=False):
 
     save_path = str(Path(out))
     txt_path = str(Path(out)) + '/results.txt'
-    
+
     for frame_idx, (path, img, im0s, vid_cap) in enumerate(dataset):
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
@@ -186,19 +200,19 @@ def detect(opt, save_img=False):
             save_path = str(Path(out) / Path(p).name)
 
             # Draw line detection
-            line = setline((0,int(im0s.shape[0]/2)),(im0s.shape[1],int(im0s.shape[0]/2))) # set line in mid hight
-            cv2.line(im0,line[0],line[1],(0,255,255),3)    
+            # set line in mid hight
+            line = setline(
+            	(0, int(im0s.shape[0]/2)), (im0s.shape[1], int(im0s.shape[0]/2)))
+            cv2.line(im0, line[0], line[1], color_linetracking, 3)
 
             if det is not None and len(det):
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_coords(
                     img.shape[2:], det[:, :4], im0.shape).round()
-
                 # Print results
                 for c in det[:, -1].unique():
                     n = (det[:, -1] == c).sum()  # detections per class
                     s += '%g %ss, ' % (n, names[int(c)])  # add to string
-
                 bbox_xywh = []
                 confs = []
                 # Adapt detections to deep sort input format
@@ -207,21 +221,17 @@ def detect(opt, save_img=False):
                     obj = [x_c, y_c, bbox_w, bbox_h]
                     bbox_xywh.append(obj)
                     confs.append([conf.item()])
-
                 xywhs = torch.Tensor(bbox_xywh)
                 confss = torch.Tensor(confs)
-
                 # Pass detections to deepsort
                 outputs = deepsort.update(xywhs, confss, im0)
-                
+
                 # draw boxes for visualization
                 if len(outputs) > 0:
                     bbox_xyxy = outputs[:, :4]
                     identities = outputs[:, -1]
-                    # print(confss)
+                    # print(outputs) # debug
                     draw_boxes(im0, bbox_xyxy, identities)
-                
-
 
                 # Delete memory of old tracks.
                 # This needs to be larger than be number of tracke object in the frame.
@@ -242,20 +252,24 @@ def detect(opt, save_img=False):
             else:
                 deepsort.increment_ages()
             # Draw result
+            # Draw FPS
+            cv2.putText(im0, "FPS: %.2f" % (1/(t2-t1)), (10, 30),
+                        cv2.FONT_HERSHEY_DUPLEX, 0.8, color_fps, 1)
             # fpnt_size ((widht,height),baseline)
-            font_size = cv2.getTextSize("any character PpYyg",cv2.FONT_HERSHEY_DUPLEX,2.0,2)
-            cv2.putText(im0, "total:  " + str(total_counter), (30, 50),
-                        cv2.FONT_HERSHEY_DUPLEX, 2.0, [0, 255, 255], 2)
-            cv2.putText(im0, "up:    " + str(up_count), (30, 50+int(font_size[0][1])+font_size[1]),
-                        cv2.FONT_HERSHEY_DUPLEX, 2.0, [0, 255, 255], 2)
-            cv2.putText(im0, "down: " + str(down_count), (30, 50+int(2*font_size[0][1]+2*font_size[1])),
-                        cv2.FONT_HERSHEY_DUPLEX, 2.0, [0, 255, 255], 2)
+            font_size = cv2.getTextSize(
+            	"any character PpYyg", cv2.FONT_HERSHEY_DUPLEX, 1.2, 2)
+            cv2.putText(im0, "total:  " + str(total_counter), (30, 60),
+                        cv2.FONT_HERSHEY_DUPLEX, 1.2, color_result, 2)
+            cv2.putText(im0, "up:    " + str(up_count), (30, 60+int(font_size[0][1])+font_size[1]),
+                        cv2.FONT_HERSHEY_DUPLEX, 1.2, color_result, 2)
+            cv2.putText(im0, "down: " + str(down_count), (30, 60+int(2*font_size[0][1]+2*font_size[1])),
+                        cv2.FONT_HERSHEY_DUPLEX, 1.2, color_result, 2)
             # Print time (inference + NMS)
             print('%sDone. (%.3fs)' % (s, t2 - t1))
 
             # Stream results
             if view_img:
-                
+
                 cv2.imshow(p, im0)
                 if cv2.waitKey(1) == ord('q') or cv2.waitKey(1) == ord('Q'):  # q to quit
                     raise StopIteration
