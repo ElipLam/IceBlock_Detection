@@ -18,12 +18,10 @@ import torch.backends.cudnn as cudnn
 from collections import deque
 import math
 
-line = [(0, 0), (655, 655)]
-center_pre= []
+line = [(0, 360), (1280, 360)]
 total_counter = 0
 up_count = 0
 down_count = 0
-counter = 0
 already_counted = deque(maxlen=70)  # temporary memory for storing counted IDs
 intersect_info = []  # initialise intersection list
 memory = {}
@@ -211,7 +209,6 @@ def detect(opt, save_img=False):
                     confs.append([conf.item()])
 
                 xywhs = torch.Tensor(bbox_xywh)
-                # print( xywhs)
                 confss = torch.Tensor(confs)
 
                 # Pass detections to deepsort
@@ -221,6 +218,7 @@ def detect(opt, save_img=False):
                 if len(outputs) > 0:
                     bbox_xyxy = outputs[:, :4]
                     identities = outputs[:, -1]
+                    # print(confss)
                     draw_boxes(im0, bbox_xyxy, identities)
                 
 
@@ -314,7 +312,7 @@ if __name__ == '__main__':
                         help='save results to *.txt')
     # class 0 is person
     parser.add_argument('--classes', nargs='+', type=int,
-                        default=[0], help='filter by class')
+                        default=[0], help='filter by class: --class 0, or --class 0 2 3')
     parser.add_argument('--agnostic-nms', action='store_true',
                         help='class-agnostic NMS')
     parser.add_argument('--augment', action='store_true',
