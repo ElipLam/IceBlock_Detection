@@ -8,7 +8,7 @@ python detect.py --weights weights/yolov5s.pt --img 416 --conf 0.4 --source data
 python detect.py --weights runs/train\exp2\weights\best.pt --img 416 --conf 0.4 --source data/images
 python detect.py --weights runs/train/tutorial3/weights/best.pt --img 416 --conf 0.4 --source data/images --save-txt
 
-python track_custom.py --source ../yolov5_dataset/pets/videos/traffic.mp4 --view-img --classes 3
+python track_custom.py --source ../yolov5_dataset/videos/traffic.mp4 --view-img --classes 3
 
 
 train sample coco128:
