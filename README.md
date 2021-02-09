@@ -2,6 +2,7 @@
 Counter Ice Block in A Factory.
 
 Thanks mikel-brostrom.
+Thanks LeonLok (https://github.com/LeonLok/Multi-Camera-Live-Object-Tracking/tree/master/traffic_counting)
 
 This project base on Yolov5_DeepSort_Pytorch.
 
