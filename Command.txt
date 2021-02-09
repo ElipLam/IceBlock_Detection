@@ -1,0 +1,23 @@
+train:
+python train.py --img 416 --batch 16 --epochs 2 --data ../yolov5_dataset/AmericanSignLanguageLetters/data_detection.yaml --cfg models/yolov5_SignLanguageLetters.yaml --weights yolov5s.pt --name ASL --nosave --cache --device cpu
+python train.py --img 416 --batch 16 --epochs 2 --data ../yolov5_dataset/pets/data_pets.yaml --cfg models/yolov5s.yaml --weights yolov5s.pt --name pets --nosave --cache --device cpu
+
+
+detect:
+python detect.py --weights weights/yolov5s.pt --img 416 --conf 0.4 --source data/images/A22_jpg.jpg
+python detect.py --weights runs/train\exp2\weights\best.pt --img 416 --conf 0.4 --source data/images
+python detect.py --weights runs/train/tutorial3/weights/best.pt --img 416 --conf 0.4 --source data/images --save-txt
+
+python track_custom.py --source ../yolov5_dataset/pets/videos/traffic.mp4 --view-img --classes 3
+
+
+train sample coco128:
+python train.py --img 640 --batch 16 --epochs 3 --data coco128.yaml --weights yolov5s.pt --nosave --cache
+
+F:\Python\yolov5\runs\train\exp2\weights\best.pt
+F:\Python\yolov5\runs\train\exp2\weights\best.pt
+F:\Python\yolov5\runs\train\exp2\weights\best.pt
+
+videos:
+1080p : 3758 frame
+360p  : 1879 frame
